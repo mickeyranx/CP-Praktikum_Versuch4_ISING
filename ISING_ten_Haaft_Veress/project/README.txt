@@ -26,6 +26,6 @@ bash ->
 make
 bash ->
 ./run_ising
-
+wenn "hello world" ausgegeben ist wurde alles richtig kompiliert
 
 
