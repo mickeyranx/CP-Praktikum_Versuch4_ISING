@@ -722,7 +722,7 @@ int main()
     //--------------------------------------------
 
    
-    testing();
+    //testing();
     
     //--------------------------------------------
     //               2.measurements
@@ -731,7 +731,7 @@ int main()
     //excercise4C();
     //exercise4B();
 
-    
+    cout << "hello world << endl;
     
 
 
