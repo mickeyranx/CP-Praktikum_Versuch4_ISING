@@ -107,38 +107,25 @@ double Simulation::changeInEnergy(vector<int> &config_1,int L ,int pos, int s, d
 void Simulation::sweepMetropolisMultihit(vector<int> &config_1, int L ,double beta, double h, int tries) {
     for (int i = 0; i < L*L; i++)
     {
-        
-        
+        int spin_start = config_1[i];
+        //try_count++;
         for (int j = 0; j < tries; j++)
         {
             int s_i = config_1[i];
-            try_count++;
-           
-                       
-            int s_i_new = (distr2(gen) == 0) ? -1 : 1; //select new random spin -1 or 1 
-
-           
-            double dH = 0;
-            //calculate change in energy
-            if (s_i != s_i_new) { //in case of spinflip
-                dH = changeInEnergy(config_1, L,i, s_i, h);
-                //std::cout << dH << std::endl;
-                if (dH < 0) {
-                    config_1[i] = s_i_new; //accept immediatly if dH < 0
-                    Simulation::acceptance_count++;
-                    
-                }
-              
-                if (distr1(gen) < exp(-beta * dH)) {
-                    
-                    config_1[i] = s_i_new;
-                    Simulation::acceptance_count++;
-                    
-                }
-            }
             
-     
+            //calculate change in energy
+            double dH = changeInEnergy(config_1, L, i, s_i, h);
+            //std::cout << dH << std::endl;
+            if (dH < 0) {
+                config_1[i] = -s_i; //accept immediatly if dH < 0
+                
+            }
+            else if (distr1(gen) < exp(-beta * dH)) {
+                config_1[i] = -s_i;
+                
+            }  
         }
+        //if(spin_start != config_1[i]) Simulation::acceptance_count++;
 
 
     }

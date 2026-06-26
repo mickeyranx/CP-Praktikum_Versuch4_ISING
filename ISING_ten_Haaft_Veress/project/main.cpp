@@ -337,14 +337,16 @@ static void parameterTesting(string output_filename, int L, double beta, double 
 
     for (int i = 0; i < therm_time; i++)//thermalisation steps
     {
-        cout << "i" << endl;
+        
         Simulation::draw(config, L, beta, h, draw_interval, multi_hit);
+        Simulation::acceptance_count = 0;
+        Simulation::try_count = 0;
     }
 
 
     ofstream File(output_filename);
     File << fixed << setprecision(5);
-    File << "beta" << "\t" << "e" << "\t" << "m" << "\t" << "|m|" << "\n";
+    File << "beta" << "\t" << "e" << "\t" << "m" << "\t" << "|m|" << "\t"<< "t_sweep" << "\n";
     //------------------------------
     //            sweeps
     //------------------------------
@@ -354,7 +356,7 @@ static void parameterTesting(string output_filename, int L, double beta, double 
         //initialise block means for energy and absolute value of magnetisation
         double prev_e_mean = 0;
         double prev_abs_m_mean = 0;
-        clock_t start_2 = clock();
+        
 
         for (int i = 0; i < N; i++)// N x block_size is the total amount of sweeps
         {
@@ -365,8 +367,10 @@ static void parameterTesting(string output_filename, int L, double beta, double 
             
 
             for (int j = 0; j < block_size; j++) { //block
-
+                clock_t start_2 = clock();
                 Simulation::draw(config, L, beta, h, draw_interval, multi_hit);
+                clock_t end_2 = clock();
+                double t_sweep = double(end_2 - start_2) / CLOCKS_PER_SEC;
                 double e = Simulation::averageEnergy(config, K, L, h); 
                
                 double M = Simulation::averageMagnetisation(L * L, config);
@@ -379,7 +383,7 @@ static void parameterTesting(string output_filename, int L, double beta, double 
                 abs_m_block[j] = absmag_i;
 
                 //writing the important data for testing thermalisation to a file
-                File << beta << "\t" << e << "\t" << m << "\t" << absmag_i << "\n";
+                File << beta << "\t" << e << "\t" << m << "\t" << absmag_i << "\t" << t_sweep<<"\n";
 
 
             }
@@ -389,12 +393,10 @@ static void parameterTesting(string output_filename, int L, double beta, double 
             
            
             if (i > 0) {
-                cout << "comparing " << next_abs_m_mean << " with " << prev_abs_m_mean << " : " << abs(next_abs_m_mean - prev_abs_m_mean) << endl;
-                clock_t end_2 = clock();
-                double elapsed = double(end_2 - start_2) / CLOCKS_PER_SEC;
-                cout << elapsed << endl;
+                //cout << "comparing " << next_abs_m_mean << " with " << prev_abs_m_mean << " : " << abs(next_abs_m_mean - prev_abs_m_mean) << endl;
+                
                 if (abs(next_abs_m_mean - prev_abs_m_mean) < epsilon && abs(next_e_mean - prev_e_mean) < epsilon) {
-                    cout << "convergence reached" << to_string(i * block_size * draw_interval) << endl;
+                    //cout << "convergence reached" << to_string(i * block_size * draw_interval) << endl;
                    
                 }
 
@@ -619,7 +621,7 @@ static void single_measurements() {
     //vector<double> betas = {0.4406868};
     vector<double> betas = { 0.8 }; //each beta also needs a seed, if this is not wanted switch below in the for loop
     vector<double> seeds = { 8731 };
-    int multi_hit = 1;
+    int multi_hit = 4;
     bool hot = true;
     
     int counter = 0;
@@ -663,19 +665,19 @@ static void testing() {
     
     double h = 0.0;//external magnetic field
 
-    int therm_steps = 0;//number of thermalize sweeps
+    int therm_steps = 5000;//number of thermalize sweeps
 
     int draw_interval = 1;//sweeps between drawing
 
-    int L = 128; //lattice dimension -> actual size is LxL
+    int L = 32; //lattice dimension -> actual size is LxL
 
-    int block_size = 100; //averages over <block_size> elements to test for convergence of the average
+    int block_size = 1; //averages over <block_size> elements to test for convergence of the average
     double epsilon = 0.001; //convergence paramter, a lot times helpful but not used to stop simulation
 
-    int N = 20000; //actual number of sweeps is draw_interval * N * blocksize
+    int N = 1000; //actual number of sweeps is draw_interval * N * blocksize
 
-    int mh = 1; //multihit parameter
-    vector<double> betas = { 0.44 };
+    int mh = 6; //multihit parameter
+    vector<double> betas = {0.6};
     
     //vector<double> betas = { 0.1, 0.2, 0.3,0.35 }; 
     
@@ -684,7 +686,7 @@ static void testing() {
     
     
 
-    bool hot = false;//hot or coldstart
+    bool hot = true;//hot or coldstart
 
 
     for (double beta : betas) {
@@ -722,7 +724,7 @@ int main()
     //--------------------------------------------
 
    
-    //testing();
+    testing();
     
     //--------------------------------------------
     //               2.measurements
@@ -731,7 +733,7 @@ int main()
     //excercise4C();
     //exercise4B();
 
-    cout << "hello world << endl;
+    
     
 
 
